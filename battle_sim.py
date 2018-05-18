@@ -33,11 +33,11 @@ params = [sp, sw, b, ar, cl, ac, cp, ram, cata]
 
 # attack_set = [7760,4000,0,0,0,0] #bbs, cls, acs, cps, rams, catas
 # defense_set = [3550, 3550, 3550, 0] #lanca, espada, archer, cp
-attack_set = [9000,4500,0,0,350,0] #bbs, cls, acs, cps, rams, catas
-defense_set = [70000, 70000, 70000, 6000] #lanca, espada, archer, cp
+attack_set = [10000,4500,0,0,350,0] #bbs, cls, acs, cps, rams, catas
+defense_set = [5000, 5000, 5000, 500] #lanca, espada, archer, cp
 
 wall_lvl = 20
-integridade = 0.5
+integridade = 0
 
 
 def time_to_recruit(sp, sw, b, ar, cl, ac, cp, ram, cata, params):
@@ -112,6 +112,8 @@ def winner_loss(attack_power, defense_power, params):
 
 
 def battle(attack_row, defense_row, params, wall_b_lvl, attack_set, defense_set):
+    wall_lvl = wall_b_lvl #CHECK THIS
+    init_attack_set = attack_set
     after_def_set = defense_set
     loser_ratio_i = [0, 0]
     loser_ratio_h = [0, 0]
@@ -181,13 +183,18 @@ def battle(attack_row, defense_row, params, wall_b_lvl, attack_set, defense_set)
             y = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl, attack_set, defense_set)
 
             return y
-    #wall_lvl=20
-    #print(wall_destroyed(wall_lvl, after_att_set))
 
-    return after_def_set
 
-def wall_destroyed(wall_lvl, after_att_set, att_lost):
-    wall_lvl -= (((after_att_set[4]) + 1 - (att_lost[4]/ 2)) - 1.09**(wall_lvl))/(2 * 1.09**(wall_lvl)) + 1
+    ##CHECK THIS###
+    after_att_set = attack_set
+    wall_lvl = wall_after_b(wall_lvl, after_att_set, init_attack_set)
+    # print(wall_lvl)
+
+    return [after_att_set, after_def_set, wall_lvl]
+
+def wall_after_b(wall_lvl, after_att, init_att):
+    att_lost = after_att[4] - init_att[4]
+    wall_lvl -= int((((after_att[4]) + 1 - (att_lost/ 2)) - 1.09**(wall_lvl))/(2 * 1.09**(wall_lvl)) + 1)
     return wall_lvl
 
 z = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl, attack_set, defense_set)

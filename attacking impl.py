@@ -69,12 +69,12 @@ class Simulate:
         return self.time #usar self?
 
 
-    def attack(self, attack, params):
-        b_att = self.params[2][0] * attack[0]
-        cl_att = self.params[4][0] * attack[1]
-        ac_att = self.params[5][0] * attack[2]
-        cp_att = self.params[6][0] * attack[3]
-        cata_att = self.params[8][0] * attack[5]
+    def attack(self):
+        b_att = self.params[2][0] * self.attack_set[0]
+        cl_att = self.params[4][0] * self.attack_set[1]
+        ac_att = self.params[5][0] * self.attack_set[2]
+        cp_att = self.params[6][0] * self.attack_set[3]
+        cata_att = self.params[8][0] * self.attack_set[5]
 
         self.total = b_att + cl_att + ac_att + cp_att + cata_att
 
@@ -82,13 +82,14 @@ class Simulate:
             row = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             return row
 
-        self.b_percent = b_att / total
-        self.cl_percent = cl_att / total
-        self.ac_percent = ac_att / total
-        self.cp_percent = cp_att / total
-        self.cata_percent = cata_att / total
+        self.b_percent = b_att / self.total
+        self.cl_percent = cl_att / self.total
+        self.ac_percent = ac_att / self.total
+        self.cp_percent = cp_att / self.total
+        self.cata_percent = cata_att / self.total
+        row = [b_att, cl_att, cp_att, ac_att, self.b_percent, self.cl_percent, self.cp_percent, self.ac_percent, cata_att, self.cata_percent]
 
-        self.row = [b_att, cl_att, cp_att, ac_att, self.b_percent, self.cl_percent, self.cp_percent, self.ac_percent, cata_att, self.cata_percent]
+        self.attack_row = row
 
 
 
@@ -102,29 +103,25 @@ class Simulate:
         return self.ramsm
 
 
-    def levels_lowered(self, wall_lvl, rams):
-        levels_lowered = int(
-            (((-0.5 - (2 * 1.09 ** wall_lvl) + rams) / (4 * 1.09 ** wall_lvl)) + 1) * (1 / (1 + integridade)))
+    def levels_lowered(self):
+        levels_lowered = int((((-0.5 - (2 * 1.09 ** self.wall_lvl) + self.attack_set[4]) / (4 * 1.09 ** self.wall_lvl)) + 1) * (1 / (1 + self.integridade)))
 
         if levels_lowered > 10:
             levels_lowered = 10
         return levels_lowered
 
 
-    def defense(self, attack, defense, params, wall_lvl):
-        def_inf = params[0][1] * defense[0] + params[1][1] * defense[1] + params[3][1] * defense[2] + params[6][1] * \
-                  defense[3]
-        def_calv = params[0][2] * defense[0] + params[1][2] * defense[1] + params[3][2] * defense[2] + params[6][2] * \
-                   defense[3]
-        def_archer = params[0][3] * defense[0] + params[1][3] * defense[1] + params[3][3] * defense[2] + params[6][3] * \
-                     defense[3]
+    def defense(self):
+        def_inf = self.params[0][1] * self.defense_set[0] + self.params[1][1] * self.defense_set[1] + self.params[3][1] * self.defense_set[2] + self.params[6][1] * self.defense_set[3]
+        def_calv = self.params[0][2] * self.defense_set[0] + self.params[1][2] * self.defense_set[1] + self.params[3][2] * self.defense_set[2] + self.params[6][2] * self.defense_set[3]
+        def_archer = self.params[0][3] * self.defense_set[0] + self.params[1][3] * self.defense_set[1] + self.params[3][3] * self.defense_set[2] + self.params[6][3] * self.defense_set[3]
         row = [def_inf, def_calv, def_archer]
-        self.row = row
+        self.defense_row = row
 
-        return self.row
+        return self.defense_row
 
 
-    def winner_loss(attack_power, defense_power, params):
+    def winner_loss(self, attack_power, defense_power):
         winner_power = defense_power
         loser_power = attack_power
 
@@ -137,31 +134,33 @@ class Simulate:
         return rate
 
 
-    def battle(self, attack_row, defense_row, defense_set):
+    def battle(self):
+        attack_row = Simulate.attack(self)
+        defense_row =  Simulate.defense(self)
         self.after_def_set = self.defense_set
         loser_ratio_i = [0, 0]
         loser_ratio_h = [0, 0]
         loser_ratio_arc = [0, 0]
-        attack_won = ['i', 'h', 'a']
+        self.attack_won = ['i', 'h', 'a']
 
-        self.wall_b_lvl -= levels_lowered(self.wall_b_lvl, self.attack_set[4])
+        self.wall_b_lvl -= Simulate.levels_lowered(self)
 
-        if attack_row[0] > 0 or attack_row[8] > 0:
-            def_to_f_i = (attack_row[4] + attack_row[9]) * defense_row[0] * (1.037 ** self.wall_b_lvl)
-            attack_won[0] = True if def_to_f_i < attack_row[0] else False
-            loser_ratio_i = winner_loss((attack_row[0] + attack_row[8]), def_to_f_i, params)
+        if self.attack_row[0] > 0 or self.attack_row[8] > 0:
+            def_to_f_i = (self.attack_row[4] + self.attack_row[9]) * self.defense_row[0] * (1.037 ** self.wall_b_lvl)
+            self.attack_won[0] = True if def_to_f_i < self.attack_row[0] else False
+            loser_ratio_i = Simulate.winner_loss(self, (self.attack_row[0] + self.attack_row[8]), def_to_f_i)
 
-        if attack_row[1] > 0 or attack_row[2] > 0:
-            def_to_f_h = (attack_row[5] + attack_row[6]) * defense_row[1] * (1.037 ** wall_b_lvl)
-            attack_won[1] = True if def_to_f_h < attack_row[1] else False
-            loser_ratio_h = winner_loss((attack_row[1] + attack_row[2]), def_to_f_h, params)
+        if self.attack_row[1] > 0 or self.attack_row[2] > 0:
+            def_to_f_h = (self.attack_row[5] + self.attack_row[6]) * self.defense_row[1] * (1.037 ** self.wall_b_lvl)
+            self.attack_won[1] = True if def_to_f_h < self.attack_row[1] else False
+            loser_ratio_h = Simulate.winner_loss(self, (self.attack_row[1] + self.attack_row[2]), def_to_f_h)
 
-        if attack_row[3] > 0:
-            def_to_f_arc = attack_row[7] * defense_row[2] * (1.037 ** wall_b_lvl)
-            attack_won[2] = True if def_to_f_arc < attack_row[3] else False
-            loser_ratio_arc = winner_loss(attack_row[3], def_to_f_arc, params)
+        if self.attack_row[3] > 0:
+            def_to_f_arc = self.attack_row[7] * self.defense_row[2] * (1.037 ** self.wall_b_lvl)
+            self.attack_won[2] = True if def_to_f_arc < self.attack_row[3] else False
+            loser_ratio_arc = Simulate.winner_loss(self, self.attack_row[3], self.def_to_f_arc)
 
-        if attack_won[0] == True:
+        if self.attack_won[0] == True:
             units_to_f_i = [defense_set[0] * (attack_row[4] + attack_row[9]),
                             defense_set[1] * (attack_row[4] + attack_row[9]),
                             defense_set[2] * (attack_row[4] + attack_row[9]),
@@ -172,7 +171,7 @@ class Simulate:
             attack_set[5] -= int(attack_set[5] * loser_ratio_i[0])
             attack_set[4] -= int(attack_set[4] * loser_ratio_i[0])
 
-        if attack_won[0] == False:
+        if self.attack_won[0] == False:
             attack_set[0] = 0
             attack_set[5] = 0
             attack_set[4] = attack_set[4]
@@ -185,7 +184,7 @@ class Simulate:
             after_def_set = [int(after_def_set[0] - def_lost[0]), int(after_def_set[1] - def_lost[1]),
                              int(after_def_set[2] - def_lost[2]), int(after_def_set[3] - def_lost[3])]
 
-        if attack_won[1] == True:
+        if self.attack_won[1] == True:
             units_to_f_h = [defense_set[0] * (attack_row[5] + attack_row[6]),
                             defense_set[1] * (attack_row[5] + attack_row[6]),
                             defense_set[2] * (attack_row[5] + attack_row[6]),
@@ -195,7 +194,7 @@ class Simulate:
             attack_set[1] -= int(attack_set[1] * loser_ratio_h[0])
             attack_set[3] -= int(attack_set[3] * loser_ratio_h[0])
 
-        if attack_won[1] == False:
+        if self.attack_won[1] == False:
             attack_set[1] = 0
             attack_set[3] = 0
             units_to_f_h = [defense_set[0] * (attack_row[5] + attack_row[6]),
@@ -207,14 +206,14 @@ class Simulate:
             after_def_set = [int(after_def_set[0] - def_lost[0]), int(after_def_set[1] - def_lost[1]),
                              int(after_def_set[2] - def_lost[2]), int(after_def_set[3] - def_lost[3])]
 
-        if attack_won[2] == True:
+        if self.attack_won[2] == True:
             units_to_f_arc = [defense_set[0] * attack_row[7], defense_set[1] * attack_row[7],
                               defense_set[2] * attack_row[7], defense_set[3] * attack_row[7]]
             after_def_set = [int(after_def_set[0] - units_to_f_arc[0]), int(after_def_set[1] - units_to_f_arc[1]),
                              int(after_def_set[2] - units_to_f_arc[2]), int(after_def_set[3] - units_to_f_arc[3])]
             attack_set[2] -= int(attack_set[2] * loser_ratio_arc[0])
 
-        if attack_won[2] == False:
+        if self.attack_won[2] == False:
             attack_set[2] = 0
             units_to_f_arc = [defense_set[0] * attack_row[7], defense_set[1] * attack_row[7],
                               defense_set[2] * attack_row[7], defense_set[3] * attack_row[7]]
@@ -288,6 +287,6 @@ def best_attack(gen_numb):
 
 simulate= Simulate()
 
-y= simulate.time_to_recruit()
+y= simulate.battle()
 
 print(y)
