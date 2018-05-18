@@ -1,0 +1,34 @@
+#### Made by Pernalonga ####
+
+import random as rd
+import operator as op
+
+villages = 120
+
+cost = [28000, 30000, 25000]
+
+
+rsrc_h = 3000
+ellegible_villages = 63
+farm = 10 * 10**6
+farm_rsrc = farm/3
+flag = True
+
+avg_rcrt_cost = 2.6 * 10**6
+
+def coins_per_day(cost, rsrc_h, vill, farm_rsrc, rcrt_cost, total_vill, flag):
+    x = 1
+    if flag:
+        x = 0.8
+    highest_cost = op.itemgetter(0)(cost) * x
+    row = []
+    coins_per_day = int(((rsrc_h * 24 * vill) + farm_rsrc - rcrt_cost)/highest_cost)
+    row.append(coins_per_day)
+
+
+    nobles_per_day = coins_per_day/total_vill
+    row.append(nobles_per_day)
+    return row
+
+print(coins_per_day(cost, rsrc_h, ellegible_villages, farm_rsrc, avg_rcrt_cost, villages, False))
+print(coins_per_day(cost, rsrc_h, ellegible_villages, farm_rsrc, avg_rcrt_cost, villages, True))
