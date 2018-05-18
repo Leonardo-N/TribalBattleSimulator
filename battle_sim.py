@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 16 17:45:54 2018
+
+@author: GoldHawk
+"""
+
+
 import operator as op
 import random as rd
 
@@ -71,6 +79,9 @@ def rams_necessary(wall_lvl, lvls_lowered):
 
     ramsm = [rams_necessary, rams_necessary2]
     return ramsm
+
+def wall_after_b(wall_lvl):
+    return wall_lvl
 
 def levels_lowered(wall_lvl, rams):
     levels_lowered = int((((-0.5 - (2*1.09**wall_lvl)+rams)/(4*1.09**wall_lvl)) + 1)*(1/(1+integridade)))
@@ -198,37 +209,53 @@ print(z)
 def random_attack_set():
     pop = 0
     attack_set = [0, 0, 0, 0, 0, 0]
-    while pop<20600:
-        random = rd.randint(0,5)
+    random_2 = rd.randint(0, 2)
 
-        if random == 0:
+    while pop<20600:
+        random = rd.randint(0,100)
+        if random_2 ==1:
+            random = rd.randint(0,95)
+        if random_2 ==2:
+            random = rd.randint(0,79)
+
+
+        if -1<random<28:
             attack_set[0] = attack_set[0] + 50
             pop = pop +50
 
-        if random == 1:
+        if 43<random< 80:
             attack_set[1] = attack_set[1] + 20
             pop = pop + 80
 
-        if random == 2:
-            attack_set[2] = attack_set[2] + 20
-            pop = pop + 100
-
-        if random == 3:
-            attack_set[3] = attack_set[3] + 20
-            pop = pop + 120
-
-        if random == 4:
+        if 28<=random<=43:
             attack_set[4] = attack_set[4] + 5
             pop = pop + 25
 
-        if random == 5:
+        if 80<=random<=95:
+            attack_set[2] = attack_set[2] + 20
+            pop = pop + 100
+
+        if random>95:
             attack_set[5] = attack_set[5] + 5
             pop = pop + 40
 
     return attack_set
 
-for i in range(1,100000):
-    x = random_attack_set()
-    if x[0]> 4500:
-        print(x)
-        print('THIS ONE')
+# for i in range(1,100000):
+#     x = random_attack_set()
+#     if x[0] > 8000:
+#          print(x)
+
+
+def best_attack(gen_numb):
+    best_effectiveness = [0,0]
+    for i in range (1,gen_numb):
+        attack_set = random_attack_set()
+        x = battle() #10x batalha - retorn [units killed, attack set]
+        x.append(time_to_recruit(attack_set)) # x = [units killed, attack set, time to recruit]
+
+        effectiveness = [x[0]/x[2], attack_set]
+        if effectiveness[0] > best_effectiveness[0]:
+            best_effectiveness = effectiveness
+
+    return best_effectiveness
