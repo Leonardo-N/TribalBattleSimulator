@@ -234,9 +234,7 @@ class Simulate:
         return self.after_def_set
 
     def wall_destroyed(self):
-        self.wall_lvl -= (((rams remaining after losses) + 1 - (rams lost / 2)) * (
-                    (strength of a ram, at the level of the sending village) / (strength of level 1 ram)) - 1 * 1.09 ^ (
-                          wall lvl)) / (2 * 1.09 ^ (wall lvl)) + 1
+        self.wall_lvl -= (((self.after_att_set[4]) + 1 - (self.att_lost[4]/ 2)) - 1.09**(self.wall_lvl))/(2 * 1.09**(self.wall_lvl)) + 1
         return
 
     def random_attack_set(self):

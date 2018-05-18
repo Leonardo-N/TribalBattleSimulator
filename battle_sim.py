@@ -33,13 +33,13 @@ params = [sp, sw, b, ar, cl, ac, cp, ram, cata]
 
 # attack_set = [7760,4000,0,0,0,0] #bbs, cls, acs, cps, rams, catas
 # defense_set = [3550, 3550, 3550, 0] #lanca, espada, archer, cp
-attack_set = [7760,4000,0,0,0,0] #bbs, cls, acs, cps, rams, catas
-defense_set = [4458, 3550, 3550, 0] #lanca, espada, archer, cp
+attack_set = [9000,4500,0,0,350,0] #bbs, cls, acs, cps, rams, catas
+defense_set = [70000, 70000, 70000, 6000] #lanca, espada, archer, cp
 
 wall_lvl = 20
 integridade = 0.5
 
-defense_set
+
 def time_to_recruit(sp, sw, b, ar, cl, ac, cp, ram, cata, params):
     quartel_time = ((sp * params[0][6]) + (sw * params[1][6]) + (b * params[2][6]) + (ar * params[3][6]))/3600
     estabulo_time = ((cl * params[4][6]) + (ac * params[5][6]) + (cp * params[6][6]))/3600
@@ -146,7 +146,7 @@ def battle(attack_row, defense_row, params, wall_b_lvl, attack_set, defense_set)
     if attack_won[0] == False:
         attack_set[0] = 0
         attack_set[5] = 0
-        attack_set[4] = attack_set[4]
+        attack_set[4] = 0
         units_to_f_i = [defense_set[0]* (attack_row[4]+attack_row[9]), defense_set[1]*(attack_row[4]+attack_row[9]), defense_set[2]*(attack_row[4]+attack_row[9]), defense_set[3]*(attack_row[4]+attack_row[9])]
         def_lost = [units_to_f_i[0] * loser_ratio_i[0], units_to_f_i[1] * loser_ratio_i[0], units_to_f_i[2] * loser_ratio_i[0], units_to_f_i[3] * loser_ratio_i[0]]
         after_def_set = [int(after_def_set[0] - def_lost[0]), int(after_def_set[1] - def_lost[1]), int(after_def_set[2] - def_lost[2]), int(after_def_set[3] - def_lost[3])]
@@ -181,9 +181,14 @@ def battle(attack_row, defense_row, params, wall_b_lvl, attack_set, defense_set)
             y = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl, attack_set, defense_set)
 
             return y
+    #wall_lvl=20
+    #print(wall_destroyed(wall_lvl, after_att_set))
 
     return after_def_set
 
+def wall_destroyed(wall_lvl, after_att_set, att_lost):
+    wall_lvl -= (((after_att_set[4]) + 1 - (att_lost[4]/ 2)) - 1.09**(wall_lvl))/(2 * 1.09**(wall_lvl)) + 1
+    return wall_lvl
 
 z = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl, attack_set, defense_set)
 
