@@ -1,3 +1,5 @@
+
+
 import operator as op
 import random as rd
 
@@ -29,7 +31,7 @@ class Simulate:
         params = [sp, sw, b, ar, cl, ac, cp, ram, cata]
         self.params = params
 
-        attack_set = [7760,4000,0,0,0,0] #bbs, cls, acs, cps, rams, catas
+        attack_set = [7760,3000,0,0,0,0] #bbs, cls, acs, cps, rams, catas
         defense_set = [3550, 3550, 3550, 0] #lanca, espada, archer, cp
         self.attack_set = attack_set #[7760, 4000, 0, 0, 0, 0]  # bbs, cls, acs, cps, rams, catas
         self.defense_set = defense_set #[4458, 3550, 3550, 0]  # lanca, espada, archer, cp
@@ -38,20 +40,26 @@ class Simulate:
         self.wall_lvl = wall_lvl
         self.wall_b_lvl = wall_lvl
         self.integridade = integridade
+        self.troops = [defense_set[0],  defense_set[1], attack_set[0], defense_set[2], attack_set[1], attack_set[2], defense_set[3], attack_set[4], attack_set[5]]
 
-        return self
+        return
 
     def reset(self):
         self.wall_b_lvl = self.wall_lvl
-        #reset attack
-        #reset after def
-        #reset units lost
-        #reset attack row and def row
+        self.defense_set = self.after_def_set
+        self.after_def_set = []
+        self.units_lost = []
 
-    def time_to_recruit(self):
-        quartel_time = ((self.sp * self.params[0][6]) + (self.sw * self.params[1][6]) + (self.b * self.params[2][6]) + (self.ar * self.params[3][6])) / 3600
-        estabulo_time = ((self.cl * self.params[4][6]) + (self.ac * self.params[5][6]) + (self.cp * self.params[6][6])) / 3600
-        oficina_time = ((self.ram * self.params[7][6]) + (self.cata * self.params[8][6])) / 3600
+    def time_to_recruit(self, att=True):
+        if not att:
+            quartel_time = ((self.troops[0] * self.params[0][6]) + (self.troops[1] * self.params[1][6]) + (self.troops[3] * self.params[3][6])) / 3600
+            estabulo_time = (self.troops[6] * self.params[6][6]) / 3600
+            oficina_time = 0
+        if att:
+            quartel_time = (self.troops[2] * self.params[2][6]) / 3600
+            estabulo_time = ((self.troops[4] * self.params[4][6]) + (self.troops[5] * self.params[5][6])) / 3600
+            oficina_time = ((self.troops[7] * self.params[7][6]) + (self.troops[8] * self.params[8][6])) / 3600
+
         time = []
         time.append(quartel_time)
         time.append(estabulo_time)
@@ -129,17 +137,17 @@ class Simulate:
         return rate
 
 
-    def battle(self, attack_row, defense_row, params, wall_b_lvl, attack_set, defense_set):
-        after_def_set = defense_set
+    def battle(self, attack_row, defense_row, defense_set):
+        self.after_def_set = self.defense_set
         loser_ratio_i = [0, 0]
         loser_ratio_h = [0, 0]
         loser_ratio_arc = [0, 0]
         attack_won = ['i', 'h', 'a']
 
-        wall_b_lvl -= levels_lowered(wall_b_lvl, attack_set[4])
+        self.wall_b_lvl -= levels_lowered(self.wall_b_lvl, self.attack_set[4])
 
         if attack_row[0] > 0 or attack_row[8] > 0:
-            def_to_f_i = (attack_row[4] + attack_row[9]) * defense_row[0] * (1.037 ** wall_b_lvl)
+            def_to_f_i = (attack_row[4] + attack_row[9]) * defense_row[0] * (1.037 ** self.wall_b_lvl)
             attack_won[0] = True if def_to_f_i < attack_row[0] else False
             loser_ratio_i = winner_loss((attack_row[0] + attack_row[8]), def_to_f_i, params)
 
@@ -212,12 +220,12 @@ class Simulate:
                               defense_set[2] * attack_row[7], defense_set[3] * attack_row[7]]
             def_lost = [units_to_f_arc[0] * loser_ratio_arc[0], units_to_f_arc[1] * loser_ratio_arc[0],
                         units_to_f_arc[2] * loser_ratio_arc[0], units_to_f_arc[3] * loser_ratio_arc[0]]
-            after_def_set = [int(after_def_set[0] - def_lost[0]), int(after_def_set[1] - def_lost[1]),
+            self.after_def_set = [int(after_def_set[0] - def_lost[0]), int(after_def_set[1] - def_lost[1]),
                              int(after_def_set[2] - def_lost[2]), int(after_def_set[3] - def_lost[3])]
 
         if not (attack_set == [0, 0, 0, 0, 0, 0] or after_def_set == [0, 0, 0, 0]):
             defense_set = after_def_set
-            y = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl,
+            self.y = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl,
                        attack_set, defense_set)
 
             return self.y
@@ -226,6 +234,9 @@ class Simulate:
         return self.after_def_set
 
     def wall_destroyed(self):
+        self.wall_lvl -= (((rams remaining after losses) + 1 - (rams lost / 2)) * (
+                    (strength of a ram, at the level of the sending village) / (strength of level 1 ram)) - 1 * 1.09 ^ (
+                          wall lvl)) / (2 * 1.09 ^ (wall lvl)) + 1
         return
 
     def random_attack_set(self):
@@ -264,34 +275,6 @@ class Simulate:
 
         return self.attack_set
 
-
-# z = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl, attack_set, defense_set)
-
-# print(attack(attack_set, params))
-#
-# print(defense(attack_set, defense_set, params, 20))
-#
-# print(z)
-
-
-# print(time_to_recruit(0,0,6500,0,3000,0,0,300,0,params))
-
-# print(levels_lowered(20, 324))
-
-# for i in range(1,11):
-#     print(rams_necessary(20,i))
-
-
-
-
-
-# for i in range(1, 100000):
-#     x = random_attack_set()
-#     if x[0] > 6000 and x[1] > 2200:
-#         print(x)
-#         print('THIS ONE')
-
-
 def best_attack(gen_numb):
     best_effectiveness = [0, 0]
     for i in range(1, gen_numb):
@@ -305,13 +288,8 @@ def best_attack(gen_numb):
 
     return best_effectiveness
 
-y= Simulate
+simulate= Simulate()
 
+y= simulate.time_to_recruit()
 
 print(y)
-
-
-def function(params, attack_set):
-    for i in range(0,len(params[0])):
-        x = int((attack_set[i]/attack_set[1])**(1/2))
-    return x
