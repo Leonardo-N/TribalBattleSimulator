@@ -31,8 +31,8 @@ class Simulate:
         params = [sp, sw, b, ar, cl, ac, cp, ram, cata]
         self.params = params
 
-        attack_set = [7760,3000,0,0,0,0] #bbs, cls, acs, cps, rams, catas
-        defense_set = [3550, 3550, 3550, 0] #lanca, espada, archer, cp
+        attack_set = [7760,3000,0,0,350,0] #bbs, cls, acs, cps, rams, catas
+        defense_set = [5000, 5000, 5000, 0] #lanca, espada, archer, cp
         self.attack_set = attack_set #[7760, 4000, 0, 0, 0, 0]  # bbs, cls, acs, cps, rams, catas
         self.defense_set = defense_set #[4458, 3550, 3550, 0]  # lanca, espada, archer, cp
         wall_lvl = 20
@@ -161,10 +161,10 @@ class Simulate:
             loser_ratio_arc = Simulate.winner_loss(self, self.attack_row[3], self.def_to_f_arc)
 
         if self.attack_won[0] == True:
-            units_to_f_i = [defense_set[0] * (attack_row[4] + attack_row[9]),
-                            defense_set[1] * (attack_row[4] + attack_row[9]),
-                            defense_set[2] * (attack_row[4] + attack_row[9]),
-                            defense_set[3] * (attack_row[4] + attack_row[9])]
+            units_to_f_i = [self.defense_set[0] * (attack_row[4] + attack_row[9]),
+                            self.defense_set[1] * (attack_row[4] + attack_row[9]),
+                            self.defense_set[2] * (self.attack_row[4] + attack_row[9]),
+                            self.defense_set[3] * (self.attack_row[4] + attack_row[9])]
             after_def_set = [int(after_def_set[0] - units_to_f_i[0]), int(after_def_set[1] - units_to_f_i[1]),
                              int(after_def_set[2] - units_to_f_i[2]), int(after_def_set[3] - units_to_f_i[3])]
             attack_set[0] -= int(attack_set[0] * loser_ratio_i[0])
@@ -172,58 +172,58 @@ class Simulate:
             attack_set[4] -= int(attack_set[4] * loser_ratio_i[0])
 
         if self.attack_won[0] == False:
-            attack_set[0] = 0
-            attack_set[5] = 0
-            attack_set[4] = attack_set[4]
-            units_to_f_i = [defense_set[0] * (attack_row[4] + attack_row[9]),
-                            defense_set[1] * (attack_row[4] + attack_row[9]),
-                            defense_set[2] * (attack_row[4] + attack_row[9]),
-                            defense_set[3] * (attack_row[4] + attack_row[9])]
-            def_lost = [units_to_f_i[0] * loser_ratio_i[0], units_to_f_i[1] * loser_ratio_i[0],
+            self.attack_set[0] = 0
+            self.attack_set[5] = 0
+            self.attack_set[4] = 0
+            units_to_f_i = [self.defense_set[0] * (self.attack_row[4] + self.attack_row[9]),
+                            self.defense_set[1] * (self.attack_row[4] + self.attack_row[9]),
+                            self.defense_set[2] * (self.attack_row[4] + self.attack_row[9]),
+                            self.defense_set[3] * (self.attack_row[4] + self.attack_row[9])]
+            self.def_lost = [units_to_f_i[0] * loser_ratio_i[0], units_to_f_i[1] * loser_ratio_i[0],
                         units_to_f_i[2] * loser_ratio_i[0], units_to_f_i[3] * loser_ratio_i[0]]
-            after_def_set = [int(after_def_set[0] - def_lost[0]), int(after_def_set[1] - def_lost[1]),
-                             int(after_def_set[2] - def_lost[2]), int(after_def_set[3] - def_lost[3])]
+            self.after_def_set = [int(self.after_def_set[0] - self.def_lost[0]), int(self.after_def_set[1] - self.def_lost[1]),
+                             int(self.after_def_set[2] - self.def_lost[2]), int(self.after_def_set[3] - self.def_lost[3])]
 
         if self.attack_won[1] == True:
-            units_to_f_h = [defense_set[0] * (attack_row[5] + attack_row[6]),
-                            defense_set[1] * (attack_row[5] + attack_row[6]),
-                            defense_set[2] * (attack_row[5] + attack_row[6]),
-                            defense_set[3] * (attack_row[5] + attack_row[6])]
-            after_def_set = [int(after_def_set[0] - units_to_f_h[0]), int(after_def_set[1] - units_to_f_h[1]),
-                             int(after_def_set[2] - units_to_f_h[2]), int(after_def_set[3] - units_to_f_h[3])]
-            attack_set[1] -= int(attack_set[1] * loser_ratio_h[0])
-            attack_set[3] -= int(attack_set[3] * loser_ratio_h[0])
+            units_to_f_h = [self.defense_set[0] * (self.attack_row[5] + self.attack_row[6]),
+                            self.defense_set[1] * (self.attack_row[5] + self.attack_row[6]),
+                            self.defense_set[2] * (self.attack_row[5] + self.attack_row[6]),
+                            self.defense_set[3] * (self.attack_row[5] + self.attack_row[6])]
+            self.after_def_set = [int(self.after_def_set[0] - units_to_f_h[0]), int(self.after_def_set[1] - units_to_f_h[1]),
+                             int(self.after_def_set[2] - units_to_f_h[2]), int(self.after_def_set[3] - units_to_f_h[3])]
+            self.attack_set[1] -= int(self.attack_set[1] * loser_ratio_h[0])
+            self.attack_set[3] -= int(self.attack_set[3] * loser_ratio_h[0])
 
         if self.attack_won[1] == False:
-            attack_set[1] = 0
-            attack_set[3] = 0
-            units_to_f_h = [defense_set[0] * (attack_row[5] + attack_row[6]),
-                            defense_set[1] * (attack_row[5] + attack_row[6]),
-                            defense_set[2] * (attack_row[5] + attack_row[6]),
-                            defense_set[3] * (attack_row[5] + attack_row[6])]
-            def_lost = [units_to_f_h[0] * loser_ratio_h[0], units_to_f_h[1] * loser_ratio_h[0],
+            self.attack_set[1] = 0
+            self.attack_set[3] = 0
+            units_to_f_h = [self.defense_set[0] * (self.attack_row[5] + self.attack_row[6]),
+                            self.defense_set[1] * (self.attack_row[5] + self.attack_row[6]),
+                            self.defense_set[2] * (self.attack_row[5] + self.attack_row[6]),
+                            self.defense_set[3] * (self.attack_row[5] + self.attack_row[6])]
+            self.def_lost = [units_to_f_h[0] * loser_ratio_h[0], units_to_f_h[1] * loser_ratio_h[0],
                         units_to_f_h[2] * loser_ratio_h[0], units_to_f_h[3] * loser_ratio_h[0]]
-            after_def_set = [int(after_def_set[0] - def_lost[0]), int(after_def_set[1] - def_lost[1]),
-                             int(after_def_set[2] - def_lost[2]), int(after_def_set[3] - def_lost[3])]
+            self.after_def_set = [int(self.after_def_set[0] - self.def_lost[0]), int(self.after_def_set[1] - self.def_lost[1]),
+                             int(self.after_def_set[2] - self.def_lost[2]), int(self.after_def_set[3] - self.def_lost[3])]
 
         if self.attack_won[2] == True:
-            units_to_f_arc = [defense_set[0] * attack_row[7], defense_set[1] * attack_row[7],
-                              defense_set[2] * attack_row[7], defense_set[3] * attack_row[7]]
-            after_def_set = [int(after_def_set[0] - units_to_f_arc[0]), int(after_def_set[1] - units_to_f_arc[1]),
-                             int(after_def_set[2] - units_to_f_arc[2]), int(after_def_set[3] - units_to_f_arc[3])]
-            attack_set[2] -= int(attack_set[2] * loser_ratio_arc[0])
+            units_to_f_arc = [self.defense_set[0] * self.attack_row[7], self.defense_set[1] * self.attack_row[7],
+                              self.defense_set[2] * self.attack_row[7], self.defense_set[3] * self.attack_row[7]]
+            self.after_def_set = [int(self.after_def_set[0] - units_to_f_arc[0]), int(self.after_def_set[1] - units_to_f_arc[1]),
+                             int(self.after_def_set[2] - units_to_f_arc[2]), int(self.after_def_set[3] - units_to_f_arc[3])]
+            self.attack_set[2] -= int(self.attack_set[2] * loser_ratio_arc[0])
 
         if self.attack_won[2] == False:
-            attack_set[2] = 0
-            units_to_f_arc = [defense_set[0] * attack_row[7], defense_set[1] * attack_row[7],
-                              defense_set[2] * attack_row[7], defense_set[3] * attack_row[7]]
-            def_lost = [units_to_f_arc[0] * loser_ratio_arc[0], units_to_f_arc[1] * loser_ratio_arc[0],
+            self.attack_set[2] = 0
+            units_to_f_arc = [self.defense_set[0] * self.attack_row[7], self.defense_set[1] * self.attack_row[7],
+                              self.defense_set[2] * self.attack_row[7], self.defense_set[3] * self.attack_row[7]]
+            self.def_lost = [units_to_f_arc[0] * loser_ratio_arc[0], units_to_f_arc[1] * loser_ratio_arc[0],
                         units_to_f_arc[2] * loser_ratio_arc[0], units_to_f_arc[3] * loser_ratio_arc[0]]
-            self.after_def_set = [int(after_def_set[0] - def_lost[0]), int(after_def_set[1] - def_lost[1]),
-                             int(after_def_set[2] - def_lost[2]), int(after_def_set[3] - def_lost[3])]
+            self.after_def_set = [int(self.after_def_set[0] - self.def_lost[0]), int(self.after_def_set[1] - self.def_lost[1]),
+                             int(self.after_def_set[2] - self.def_lost[2]), int(self.after_def_set[3] - self.def_lost[3])]
 
-        if not (attack_set == [0, 0, 0, 0, 0, 0] or after_def_set == [0, 0, 0, 0]):
-            defense_set = after_def_set
+        if not (self.attack_set == [0, 0, 0, 0, 0, 0] or self.after_def_set == [0, 0, 0, 0]):
+            self.defense_set = self.after_def_set
             self.y = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl,
                        attack_set, defense_set)
 

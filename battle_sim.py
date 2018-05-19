@@ -33,8 +33,8 @@ params = [sp, sw, b, ar, cl, ac, cp, ram, cata]
 
 # attack_set = [7760,4000,0,0,0,0] #bbs, cls, acs, cps, rams, catas
 # defense_set = [3550, 3550, 3550, 0] #lanca, espada, archer, cp
-attack_set = [10000,4500,0,0,350,0] #bbs, cls, acs, cps, rams, catas
-defense_set = [5000, 5000, 5000, 500] #lanca, espada, archer, cp
+attack_set = [6500,3000,0,0,350,0] #bbs, cls, acs, cps, rams, catas
+defense_set = [10000, 10000, 5000, 1000] #lanca, espada, archer, cp
 
 wall_lvl = 20
 integridade = 0
