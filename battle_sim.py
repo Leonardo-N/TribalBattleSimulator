@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed May 16 17:45:54 2018
+Created on Wed May 16 17:45 2018
 
 @author: GoldHawk
 """

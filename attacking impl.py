@@ -1,4 +1,9 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May 16 17:45 2018
 
+@author: GoldHawk
+"""
 
 import operator as op
 import random as rd
@@ -32,7 +37,7 @@ class Simulate:
         self.params = params
 
         attack_set = [7760,3000,0,0,350,0] #bbs, cls, acs, cps, rams, catas
-        defense_set = [5000, 5000, 5000, 0] #lanca, espada, archer, cp
+        defense_set = [5000, 5000, 5000, 2000] #lanca, espada, archer, cp
         self.attack_set = attack_set #[7760, 4000, 0, 0, 0, 0]  # bbs, cls, acs, cps, rams, catas
         self.defense_set = defense_set #[4458, 3550, 3550, 0]  # lanca, espada, archer, cp
         wall_lvl = 20
@@ -230,10 +235,17 @@ class Simulate:
             return self.y
 
         after_def_set = self.after_def_set
-        return self.after_def_set
+        self.after_att_set = self.attack_set
+        return [self.after_att_set, self.after_def_set, self.wall_lvl]
 
     def wall_destroyed(self):
-        self.wall_lvl -= (((self.after_att_set[4]) + 1 - (self.att_lost[4]/ 2)) - 1.09**(self.wall_lvl))/(2 * 1.09**(self.wall_lvl)) + 1
+        if self.attack_won[0] or self.attack_won[1] or self.attack_won[2]:
+            self.wall_lvl -= (((self.after_att_set[4]) + 1 - (self.att_lost[4]/ 2)) - 1.09**(self.wall_lvl))/(2 * 1.09**(self.wall_lvl)) + 1
+            return
+        else:
+            other_calculus = 'other'
+            return
+
         return
 
     def random_attack_set(self):
@@ -268,7 +280,7 @@ class Simulate:
                 attack_set[5] = attack_set[5] + 5
                 pop = pop + 40
 
-        attack_set = self.attack_set
+        self.attack_set = attack_set
 
         return self.attack_set
 
