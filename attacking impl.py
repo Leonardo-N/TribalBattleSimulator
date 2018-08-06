@@ -37,7 +37,7 @@ class Simulate:
         self.params = params
 
         attack_set = [7760,3000,0,0,350,0] #bbs, cls, acs, cps, rams, catas
-        defense_set = [5000, 5000, 5000, 2000] #lanca, espada, archer, cp
+        defense_set = [30000, 30000, 20000, 4000] #lanca, espada, archer, cp
         self.attack_set = attack_set #[7760, 4000, 0, 0, 0, 0]  # bbs, cls, acs, cps, rams, catas
         self.defense_set = defense_set #[4458, 3550, 3550, 0]  # lanca, espada, archer, cp
         wall_lvl = 20
@@ -161,8 +161,8 @@ class Simulate:
             loser_ratio_h = Simulate.winner_loss(self, (self.attack_row[1] + self.attack_row[2]), def_to_f_h)
 
         if self.attack_row[3] > 0:
-            def_to_f_arc = self.attack_row[7] * self.defense_row[2] * (1.037 ** self.wall_b_lvl)
-            self.attack_won[2] = True if def_to_f_arc < self.attack_row[3] else False
+            self.def_to_f_arc = self.attack_row[7] * self.defense_row[2] * (1.037 ** self.wall_b_lvl)
+            self.attack_won[2] = True if self.def_to_f_arc < self.attack_row[3] else False
             loser_ratio_arc = Simulate.winner_loss(self, self.attack_row[3], self.def_to_f_arc)
 
         if self.attack_won[0] == True:
@@ -172,9 +172,9 @@ class Simulate:
                             self.defense_set[3] * (self.attack_row[4] + attack_row[9])]
             after_def_set = [int(after_def_set[0] - units_to_f_i[0]), int(after_def_set[1] - units_to_f_i[1]),
                              int(after_def_set[2] - units_to_f_i[2]), int(after_def_set[3] - units_to_f_i[3])]
-            attack_set[0] -= int(attack_set[0] * loser_ratio_i[0])
-            attack_set[5] -= int(attack_set[5] * loser_ratio_i[0])
-            attack_set[4] -= int(attack_set[4] * loser_ratio_i[0])
+            self.attack_set[0] -= int(attack_set[0] * loser_ratio_i[0])
+            self.attack_set[5] -= int(attack_set[5] * loser_ratio_i[0])
+            self.attack_set[4] -= int(attack_set[4] * loser_ratio_i[0])
 
         if self.attack_won[0] == False:
             self.attack_set[0] = 0
@@ -227,12 +227,12 @@ class Simulate:
             self.after_def_set = [int(self.after_def_set[0] - self.def_lost[0]), int(self.after_def_set[1] - self.def_lost[1]),
                              int(self.after_def_set[2] - self.def_lost[2]), int(self.after_def_set[3] - self.def_lost[3])]
 
-        if not (self.attack_set == [0, 0, 0, 0, 0, 0] or self.after_def_set == [0, 0, 0, 0]):
-            self.defense_set = self.after_def_set
-            self.y = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl,
-                       attack_set, defense_set)
-
-            return self.y
+        # if not (self.attack_set == [0, 0, 0, 0, 0, 0] or self.after_def_set == [0, 0, 0, 0]):
+        #     self.defense_set = self.after_def_set
+        #     self.y = battle(attack(attack_set, params), defense(attack_set, defense_set, params, wall_lvl), params, wall_lvl,
+        #                attack_set, defense_set)
+        #
+        #     return self.y
 
         after_def_set = self.after_def_set
         self.after_att_set = self.attack_set
@@ -284,21 +284,31 @@ class Simulate:
 
         return self.attack_set
 
-def best_attack(gen_numb):
-    best_effectiveness = [0, 0]
-    for i in range(1, gen_numb):
-        attack_set = random_attack_set()
-        x = battle()  # 10x batalha - retorn [units killed, attack set]
-        x.append(time_to_recruit(attack_set))  # x = [units killed, attack set, time to recruit]
+    def best_attack(self, gen_numb):
+        self.best_effectiveness = [0, 0]
+        self.base_def_set = [30000, 30000, 20000, 4000]
+        for i in range(1, gen_numb):
+            self.random_attack = Simulate.random_attack_set(self)
+            self.attack_set = self.random_attack
+            self.defense_set = self.base_def_set
+            for j in range (1,4):
+                self.attack_set = self.random_attack
+                x = Simulate.battle(self)  # 10x batalha - retorn [units killed, attack set]
+            x.append(simulate.time_to_recruit(self.random_attack))  # x = [units killed, attack set, time to recruit]
+            x[0] = self.base_def_set[0] - x[1][0]
 
-        effectiveness = [x[0] / x[2], attack_set]
-        if effectiveness[0] > best_effectiveness[0]:
-            best_effectiveness = effectiveness
 
-    return best_effectiveness
+            self.effectiveness = [x[0] / x[2], self.random_attack]
+            if self.effectiveness[0] > self.best_effectiveness[0]:
+                self.best_effectiveness = self.effectiveness
+
+        return self.best_effectiveness
 
 simulate= Simulate()
 
 y= simulate.battle()
 
 print(y)
+
+best = simulate.best_attack(20)
+print(best)
